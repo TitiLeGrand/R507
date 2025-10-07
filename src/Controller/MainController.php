@@ -71,10 +71,14 @@ final class MainController extends AbstractController
     #[Route('/liste', name: 'list')]
     public function list(ContactRepository $repository, Request $request): Response
     {
-        $contacts = $repository->findAll();
+        $status = $request->query->get('status', 'all');
+        $contacts = ($status === 'all')
+            ? $repository->findAll()
+            : $repository->findBy(['status' => $status]);
 
         return $this->render('main/list.html.twig', [
             'contacts' => $contacts,
+            'currentStatus' => $status,
         ]);
     }
 }

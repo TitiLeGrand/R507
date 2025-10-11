@@ -21,44 +21,23 @@
                 <form method="get">
                     <div class="form-group row">
                         <label for="search" class="col-2 col-form-label">Recherche</label>
-                        <div class="col-10">
+                        <div class="col-4">
                             <input type="text" class="form-control" id="search" name="search" value="{{ search }}">
+                        </div>
+
+                        <label for="status" class="col-2 col-form-label">Statut</label>
+                        <div class="col-4">
+                            <select class="form-control" id="status" name="status" onchange="this.form.submit()">
+                                <option value="all" {% if currentStatus == 'all' %}selected{% endif %}>Tous</option>
+                                <option value="new" {% if currentStatus == 'new' %}selected{% endif %}>Nouveau</option>
+                                <option value="treated" {% if currentStatus == 'treated' %}selected{% endif %}>Traité</option>
+                                <option value="archived" {% if currentStatus == 'archived' %}selected{% endif %}>Archivé</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div>
+                    <div class="mt-2">
                         <a href="{{ path('main_list') }}" class="btn btn-danger">
-                            Réinitialiser la recherche
+                            Réinitialiser
                         </a>
                         <button type="submit" class="btn btn-success">
-                            Rechercher
-                        </button>
-                    </div>
-                </form>
-
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>id</th>
-                        <th>Prénom</th>
-                        <th>Nom</th>
-                        <th>Date</th>
-                        <th>Statut</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for contact in contacts %}
-                        <tr>
-                            <td>{{ contact.id }}</td>
-                            <td>{{ contact.firstName }}</td>
-                            <td>{{ contact.name }}</td>
-                            <td>{{ contact.createdAt|date("H:i - m/d/Y") }}</td>
-                            <td>{{ contact.status }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-{% endblock %}

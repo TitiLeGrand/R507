@@ -27,7 +27,7 @@ class Contact
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(length: 20)]
-    private ?string $status = null;
+    private ?string $status = "default";
 
     public function getId(): ?int
     {
@@ -87,7 +87,7 @@ class Contact
         return $this->status;
     }
 
-    public function setStatus(string $status): static
+    public function setStatus(string $status = "default"): static
     {
         $this->status = $status;
 

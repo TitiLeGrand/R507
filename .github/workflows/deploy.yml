@@ -3,10 +3,10 @@ name: Test + Deploy
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 jobs:
   tests:
     name: Run PHPUnit tests
@@ -74,8 +74,10 @@ jobs:
         with:
           php-version: '8.2'
 
-      - name: Install dependencies
-        run: composer install --no-dev --optimize-autoloader
+      - name: Install production dependencies
+        run: |
+          composer install --no-dev --optimize-autoloader
+          php bin/console cache:clear --env=prod --no-debug
 
       - name: deploy via FTP 
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -95,3 +97,5 @@ jobs:
             **/var/*
             composer.json
             composer.lock
+            node_modules/
+            .env

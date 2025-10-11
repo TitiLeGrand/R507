@@ -1,0 +1,59 @@
+name: Run PHPUnit tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: symfony_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, pdo_mysql
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Wait for MySQL to be ready
+        run: |
+          sudo apt-get install -y mysql-client
+          until mysqladmin ping -h 127.0.0.1 --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+
+      - name: Create test database schema
+        env:
+          DATABASE_URL: "mysql://root:root@127.0.0.1:3306/symfony_test"
+        run: |
+          php bin/console doctrine:database:create --env=test --if-not-exists
+          php bin/console doctrine:schema:create --env=test
+
+      - name: Run PHPUnit tests
+        env:
+          DATABASE_URL: "mysql://root:root@127.0.0.1:3306/symfony_test"
+        run: vendor/bin/phpunit

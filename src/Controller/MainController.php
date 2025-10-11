@@ -18,8 +18,9 @@ final class MainController extends AbstractController
     #[Route('/connexion', name: 'login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        if (!empty($this->getUser()))
+        if (!empty($this->getUser())) {
             return $this->redirectToRoute('admin');
+        }
 
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'error' => $authenticationUtils->getLastAuthenticationError(),
@@ -29,7 +30,6 @@ final class MainController extends AbstractController
             'username_label' => 'Utilisateur',
             'password_label' => 'Mot de passe',
             'sign_in_label' => 'Connexion',
-
             'forgot_password_enabled' => false,
             'remember_me_enabled' => false,
         ]);
@@ -68,28 +68,41 @@ final class MainController extends AbstractController
         ]);
     }
 
-    #[Route('/liste/{page}', name: 'list')]
-    public function list(ContactRepository $repository, Request $request, ?int $page = 1): Response
+    #[Route('/liste', name: 'list')]
+    public function list(ContactRepository $repository, Request $request): Response
     {
+        $search = $request->query->get('search');
         $status = $request->query->get('status', 'all');
         $page = $request->query->getInt('page', 1);
         $limit = 2;
 
-        if ($status === 'all') {
-            $contacts = $repository->paginate($page, $limit);
-            $totalContacts = $repository->count();
+        if ($search) {
+            // Si recherche, on ignore la pagination/filtre par statut
+            $contacts = $repository->search($search);
+            $totalPages = 1;
+            $currentPage = 1;
+            $currentStatus = 'all';
         } else {
-            $contacts = $repository->paginateByStatus($status, $page, $limit);
-            $totalContacts = $repository->count(['status' => $status]);
-        }
+            // Pagination avec filtre par status
+            if ($status === 'all') {
+                $contacts = $repository->paginate($page, $limit);
+                $totalContacts = $repository->count();
+            } else {
+                $contacts = $repository->paginateByStatus($status, $page, $limit);
+                $totalContacts = $repository->count(['status' => $status]);
+            }
 
-        $totalPages = ceil($totalContacts / $limit);
+            $totalPages = ceil($totalContacts / $limit);
+            $currentPage = $page;
+            $currentStatus = $status;
+        }
 
         return $this->render('main/list.html.twig', [
             'contacts' => $contacts,
-            'currentPage' => $page,
+            'search' => $search,
+            'currentPage' => $currentPage,
             'totalPages' => $totalPages,
-            'currentStatus' => $status,
+            'currentStatus' => $currentStatus,
         ]);
     }
 }

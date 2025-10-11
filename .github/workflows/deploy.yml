@@ -97,8 +97,8 @@ jobs:
           exclude: |
             **/.git*
             **/.github*
-            **/tests*
-            **/var/*
+            **/tests/**
+            **/var/**
             composer.json
             composer.lock
             node_modules/

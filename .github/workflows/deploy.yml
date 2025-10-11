@@ -3,10 +3,10 @@ name: Test + Deploy
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 jobs:
   tests:
     name: Run PHPUnit tests
